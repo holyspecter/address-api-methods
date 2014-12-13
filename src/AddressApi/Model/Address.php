@@ -160,14 +160,49 @@ class Address implements \JsonSerializable
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function jsonSerialize()
+    {
+        return [
+            'ADDRESSID'   => $this->getId(),
+            'LABEL'       => $this->getLabel(),
+            'CITY'        => $this->getCity(),
+            'COUNTRY'     => $this->getCountry(),
+            'HOUSENUMBER' => $this->getHouseNumber(),
+            'POSTALCODE'  => $this->getPostalCode(),
+        ];
+    }
+
+    public function save()
+    {
+        if ($this->id) {
+            $stmt = DBConnection::getInstance()->prepare(
+                "UPDATE ADDRESS SET LABEL=?, STREET=?, HOUSENUMBER=?, POSTALCODE=?, CITY=?, COUNTRY=? WHERE ADDRESSID=" . $this->id
+            );
+        } else {
+            $stmt = DBConnection::getInstance()->prepare("INSERT INTO ADDRESS VALUES (NULL, ?, ?, ?, ?, ?, ?)");
+        }
+
+        $stmt->bind_param(
+            'ssssss',
+            $this->label, $this->street, $this->houseNumber, $this->postalCode, $this->city, $this->country
+        );
+
+        return $stmt->execute();
+    }
+
+    /**
      * @param int $id
      *
      * @return Address|null
      */
     public static function find($id)
     {
-        if ($result = DBConnection::getInstance()->query("SELECT * FROM ADDRESS WHERE ADDRESSID=$id")) {
-            return self::fromArray($result->fetch_assoc());
+        $result = DBConnection::getInstance()->query("SELECT * FROM ADDRESS WHERE ADDRESSID=$id");
+
+        if ($row = $result->fetch_assoc()) {
+            return self::fromArray($row);
         }
 
         return null;
@@ -194,9 +229,9 @@ class Address implements \JsonSerializable
      *
      * @return Address
      */
-    private static function fromArray(array $data)
+    public static function fromArray(array $data)
     {
-        $neededValues = ['ADDRESSID', 'LABEL', 'CITY', 'COUNTRY', 'HOUSENUMBER', 'POSTALCODE'];
+        $neededValues = ['STREET', 'LABEL', 'CITY', 'COUNTRY', 'HOUSENUMBER', 'POSTALCODE'];
 
 //        if (array_keys($data) != $neededValues) { todo find out nice checking
 //            throw new \InvalidArgumentException();
@@ -209,21 +244,7 @@ class Address implements \JsonSerializable
             ->setCountry($data['COUNTRY'])
             ->setHouseNumber($data['HOUSENUMBER'])
             ->setPostalCode($data['POSTALCODE'])
+            ->setStreet($data['STREET'])
         ;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    function jsonSerialize()
-    {
-        return [
-            'ADDRESSID'   => $this->getId(),
-            'LABEL'       => $this->getLabel(),
-            'CITY'        => $this->getCity(),
-            'COUNTRY'     => $this->getCountry(),
-            'HOUSENUMBER' => $this->getHouseNumber(),
-            'POSTALCODE'  => $this->getPostalCode(),
-        ];
     }
 }

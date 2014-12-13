@@ -12,10 +12,26 @@ class ApiController
         die;
     }
 
+    public function createAction()
+    {
+        $address = Address::fromArray($_POST);
+
+        $address->save();
+    }
+
     public function showAction()
     {
         echo json_encode(Address::find($this->getIdFromUrl()));
         die;
+    }
+
+    public function updateAction()
+    {
+        parse_str(file_get_contents("php://input"), $data);
+
+        $address = Address::fromArray(array_merge($data, ['ADDRESSID' => $this->getIdFromUrl()]));
+
+        $address->save();
     }
 
     /**
