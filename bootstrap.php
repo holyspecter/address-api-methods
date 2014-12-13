@@ -1,9 +1,10 @@
 <?php
 
+define('PROJECT_ROOT', __DIR__);
+
 spl_autoload_register(function ($className) {
     $className = ltrim($className, '\\');
-    $fileName  = 'src/';
-    $namespace = '';
+    $fileName  = PROJECT_ROOT . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR;
     if ($lastNsPos = strripos($className, '\\')) {
         $namespace = substr($className, 0, $lastNsPos);
         $className = substr($className, $lastNsPos + 1);
@@ -13,5 +14,3 @@ spl_autoload_register(function ($className) {
 
     require $fileName;
 });
-
-define('PROJECT_ROOT', __DIR__);
