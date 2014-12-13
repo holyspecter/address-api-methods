@@ -6,6 +6,13 @@ use AddressApi\DBConnection;
 
 class Address implements \JsonSerializable
 {
+    /** @var array  */
+    public static $fieldLengths = [
+        'HOUSENUMBER' => 10,
+        'POSTALCODE'  => 6,
+        'default'     => 100,
+    ];
+
     private $id;
 
     private $label;
@@ -233,9 +240,9 @@ class Address implements \JsonSerializable
     {
         $neededValues = ['STREET', 'LABEL', 'CITY', 'COUNTRY', 'HOUSENUMBER', 'POSTALCODE'];
 
-//        if (array_keys($data) != $neededValues) { todo find out nice checking
-//            throw new \InvalidArgumentException();
-//        }
+        if ($amendedFields = array_diff($neededValues, array_intersect(array_keys($data), $neededValues))) {
+            throw new \InvalidArgumentException(sprintf("Fields `%s` are required.", implode(', ', $amendedFields)));
+        }
 
         return (new Address())
             ->setId(isset($data['ADDRESSID']) ? $data['ADDRESSID'] : null)
