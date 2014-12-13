@@ -20,7 +20,7 @@ class Router
                     call_user_func([$controller, $action]);
                 }
 
-                break;
+                return;
             }
         }
 
